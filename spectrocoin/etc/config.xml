@@ -1,0 +1,32 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <spectrocoin_merchant>
+                <active>0</active>
+                <model>Spectrocoin\Merchant\Model\Payment</model>
+                <order_status>pending_payment</order_status>
+                <payment_action>authorize_capture</payment_action>
+                <title>Bitcoin via Spectrocoin</title>
+
+                <api_fields>
+                    <api_url>https://spectrocoin.com/api/merchant/1</api_url>
+                </api_fields>
+
+                <payment_settings>
+                    <order_payment_method>pay</order_payment_method>
+                    <order_status_test>payment_review</order_status_test>
+                    <order_status_new>new</order_status_new>
+                    <order_status_pending>pending_payment</order_status_pending>
+                    <order_status_expired>canceled</order_status_expired>
+                    <order_status_failed>closed</order_status_failed>
+                    <order_status_paid>complete</order_status_paid>
+                </payment_settings>
+
+                <debug_fields>
+                    <debug_mode>0</debug_mode>
+                </debug_fields>
+
+            </spectrocoin_merchant>
+        </payment>
+    </default>
+</config>
