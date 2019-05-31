@@ -29,7 +29,7 @@ Clone plugin:
 `user$ git clone git@bitbucket.org:alexshiii/spectrocoin-magento2.git ./app/code/Spectrocoin/Merchant`
 
 Run magento:
- 
+`user$ bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
 `user$ bin/magento setup:upgrade`
 
 

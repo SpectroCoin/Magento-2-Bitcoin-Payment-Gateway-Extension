@@ -6,8 +6,6 @@ use Spectrocoin\Merchant\Library\SCMerchantClient\Message\CreateOrderResponse;
 use Spectrocoin\Merchant\Library\SCMerchantClient\Data\ApiError;
 use Spectrocoin\Merchant\Library\SCMerchantClient\Data\OrderCallback;
 
-include_once('httpful.phar');
-
 
 class SCMerchantClient {
 
