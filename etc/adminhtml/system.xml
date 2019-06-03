@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="spectrocoin_merchant" translate="label" type="text" sortOrder="88" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Bitcoin via Spectrocoin</label>
+                <comment>
+                    <![CDATA[Payment module for <a href="https://spectrocoin.com" target="_blank">Spectrocoin</a>]]>
+                </comment>
+
+                <!-- Statuses -->
+                <group id="payment_settings" type="text" translate="label" showInDefault="1" showInWebsite="1" sortOrder="30">
+                    <label>Payment settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+
+                    <field id="order_payment_method" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Payment Method</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\PaymentMethod</source_model>
+                        <comment>In case the fee is paid by the client, the fee amount will be added to the total price of the item/service. E.g item/service price is 100 USD and the fee is 0.5% then the client will pay 100.5 USD. You will receive the full item price – 100 USD. In case the fee is paid by you, the fee will be deducted from the total item price, hence you will receive 99.5 USD.</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_test" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status Test</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;Test&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_new" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status New</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;New&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_pending" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status Pending</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;Pending&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_expired" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status Expired</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;Expired&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_failed" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status Failed</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;Failed&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="order_status_paid" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                        <label>Order Status Paid</label>
+                        <source_model>Spectrocoin\Merchant\Model\Adminhtml\Source\OrderState</source_model>
+                        <comment>Order State for Spectrocoin status &quot;Paid&quot;</comment>
+                        <validate>required-entry</validate>
+                    </field>
+                </group>
+
+                <group id="debug_fields" type="text" translate="label" showInDefault="1" showInWebsite="1" sortOrder="200">
+                    <label>Debug settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+
+                    <field id="debug_mode" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Debug mode</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Enable debug mode for Spectrocoin API</comment>
+                    </field>
+                </group>
+
+                <!-- Common fields -->
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+
+                <field id="sort_order" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                </field>
+
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                </field>
+
+                <field id="min_order_total" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Order Total</label>
+                </field>
+
+                <field id="max_order_total" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Maximum Order Total</label>
+                    <comment>Leave empty to disable limit</comment>
+                </field>
+
+                <!-- Spectrocoin settings -->
+
+                <group id="api_fields" type="text" translate="label" showInDefault="1" showInWebsite="1" sortOrder="20">
+                    <label>API settings</label>
+                    <frontend_model>Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+                    <field id="api_url" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>API URL</label>
+                        <validate>required-entry</validate>
+                    </field>
+
+                    <field id="merchant_id" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Merchant ID</label>
+                        <validate>validate-number</validate>
+                    </field>
+
+                    <field id="project_id" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Project (API) ID</label>
+                        <validate>validate-number</validate>
+                    </field>
+
+                    <field id="private_key" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Private key</label>
+                        <validate>required-entry</validate>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>
