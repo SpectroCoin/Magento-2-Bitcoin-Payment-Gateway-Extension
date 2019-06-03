@@ -39,8 +39,14 @@ Run magento:
 
 ### Install files via composer
 
-Coming soon...
+Go to the magento web-root.
+Enter following command:
+`composer require spectrocoin/magento2merchant`
 
+Enter following commands to enable plugin:
+`php bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
+
+`php bin/magento setup:upgrade`
 
 **CONFIGURATION**
 
