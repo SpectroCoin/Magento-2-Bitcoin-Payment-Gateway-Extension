@@ -9,8 +9,9 @@ To succesfully use this plugin, you have to have a SpectroCoin Bitcoin wallet. Y
 This plugin can be installed different ways:
 
 * Copy files and directories to your server
+* /spectrocoin/ folder from repository should be moved to /app/code/Spectrocoin/Merchant folder in magento.
 
-### Copying files and directories to your server
+### Copying files and directories to your server manually
 
 Connect to your server by ssh: 
 
@@ -29,8 +30,16 @@ Clone plugin:
 `user$ git clone git@bitbucket.org:alexshiii/spectrocoin-magento2.git ./app/code/Spectrocoin/Merchant`
 
 Run magento:
+
+`user$ composer require nategood/httpful` (this dependency has to be installed manually)
+
 `user$ bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
+
 `user$ bin/magento setup:upgrade`
+
+### Install files via composer
+
+Coming soon...
 
 
 **CONFIGURATION**
