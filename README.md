@@ -19,23 +19,26 @@ Connect to your server by ssh:
 
 Go to the magento web-root: 
 
-`user$ cd /var/www`
+`cd /var/www`
 
 Create directories for the extension: 
 
-`user$ mkdir -p app/code/Spectrocoin/Merchant`
+`mkdir -p app/code/Spectrocoin/Merchant`
  
 Clone plugin:
 
-`user$ git clone git@bitbucket.org:alexshiii/spectrocoin-magento2.git ./app/code/Spectrocoin/Merchant`
+`git clone https://github.com/SpectroCoin/Magento-2-Bitcoin-Payment-Gateway-Extension.git ./app/code/Spectrocoin/Merchant`
+
 
 Run magento:
 
-`user$ composer require nategood/httpful` (this dependency has to be installed manually)
+`composer require nategood/httpful` (this dependency has to be installed manually)
 
-`user$ bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
+`bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
 
-`user$ bin/magento setup:upgrade`
+`bin/magento setup:upgrade`
+
+`bin/magento setup:di:compile`
 
 ### Install files via composer
 
@@ -47,6 +50,8 @@ Enter following commands to enable plugin:
 `php bin/magento module:enable Spectrocoin_Merchant --clear-static-content`
 
 `php bin/magento setup:upgrade`
+
+`bin/magento setup:di:compile`
 
 **CONFIGURATION**
 
