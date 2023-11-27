@@ -25,6 +25,11 @@ class PlaceOrder extends Action {
     protected $orderFactory;
 
     /**
+     * @var PaymentModel
+     */
+    protected $paymentModel; // Explicitly declare the property here
+
+    /**
      * @param Context $context
      * @param OrderFactory $orderFactory
      * @param Session $checkoutSession
@@ -57,7 +62,4 @@ class PlaceOrder extends Action {
         );
         return;
     }
-
-
-
 }

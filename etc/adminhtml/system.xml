@@ -119,12 +119,12 @@
 
                     <field id="merchant_id" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Merchant ID</label>
-                        <validate>validate-number</validate>
+                        <validate>required-entry</validate>
                     </field>
 
                     <field id="project_id" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Project (API) ID</label>
-                        <validate>validate-number</validate>
+                        <validate>required-entry</validate>
                     </field>
 
                     <field id="private_key" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
