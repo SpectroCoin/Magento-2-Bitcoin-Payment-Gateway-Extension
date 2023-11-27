@@ -23,8 +23,6 @@ class SCMerchantClient {
 
     protected $client;
 
-	protected $testPayload;
-	protected $testSignature;
 
     /**
      * @param $merchantApiUrl
@@ -71,11 +69,9 @@ class SCMerchantClient {
 			'successUrl' => $request->getSuccessUrl(),
 			'failureUrl' => $request->getFailureUrl(),
         );
-		$testPayload = $payload;
 
         $data = http_build_query($payload);
         $signature = $this->generateSignature($data);
-		$testSignature = $signature;
         $payload['sign'] = $signature;
 
         try {
@@ -120,11 +116,8 @@ class SCMerchantClient {
 		$privateKey = $this->privateMerchantKey != null ? $this->privateMerchantKey : file_get_contents($this->privateMerchantCertLocation);
 		$pkeyid = openssl_pkey_get_private($privateKey);
 
-		// compute signature
 		$s = openssl_sign($data, $signature, $pkeyid, OPENSSL_ALGO_SHA1);
 		$encodedSignature = base64_encode($signature);
-		// free the key from memory
-		// openssl_free_key($pkeyid);
 
 		return $encodedSignature;
 	}
@@ -188,14 +181,13 @@ class SCMerchantClient {
 	 * @return int
 	 */
 	private function validateSignature($data, $signature)
-{
-    $sig = base64_decode($signature);
-    $publicKey = file_get_contents($this->publicSpectroCoinCertLocation);
-    $public_key_pem = openssl_pkey_get_public($publicKey);
-    $r = openssl_verify($data, $sig, $public_key_pem, OPENSSL_ALGO_SHA1);
-    // openssl_free_key($public_key_pem); // Deprecated and no longer needed, so it's commented out
+	{
+		$sig = base64_decode($signature);
+		$publicKey = file_get_contents($this->publicSpectroCoinCertLocation);
+		$public_key_pem = openssl_pkey_get_public($publicKey);
+		$r = openssl_verify($data, $sig, $public_key_pem, OPENSSL_ALGO_SHA1);
 
-    return $r;
-}
+		return $r;
+	}
 
 }
