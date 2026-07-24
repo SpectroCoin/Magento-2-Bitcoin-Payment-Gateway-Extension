@@ -268,6 +268,32 @@ class Payment extends AbstractMethod {
         return $statusOption;
     }
 
+    /**
+     * Defence-in-depth check that a (signature-verified) callback actually
+     * refers to this Magento order: the currency must match and the callback
+     * amount must equal the order grand total. The fiat total lives in
+     * payAmount or receiveAmount depending on the configured order payment
+     * method, so either matching is accepted.
+     *
+     * @param OrderCallback $callback
+     * @param Order $order
+     * @return bool
+     */
+    public function matchesOrder(OrderCallback $callback, Order $order) {
+        $orderCurrency = $order->getOrderCurrencyCode();
+        if ($callback->getReceiveCurrency() !== $orderCurrency
+            && $callback->getPayCurrency() !== $orderCurrency) {
+            return false;
+        }
+
+        $grandTotal = (float) number_format($order->getGrandTotal(), 2, '.', '');
+        $payAmount = (float) $callback->getPayAmount();
+        $receiveAmount = (float) $callback->getReceiveAmount();
+
+        return abs($grandTotal - $payAmount) < 0.01
+            || abs($grandTotal - $receiveAmount) < 0.01;
+    }
+
     public function updateOrderStatus(OrderCallback $callback, Order $order) {
         try {
             $orderState = $this->getOrderStatus($callback->getStatus());

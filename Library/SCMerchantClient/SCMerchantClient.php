@@ -48,6 +48,18 @@ class SCMerchantClient {
     public function setPrivateMerchantKey($privateKey) {
         $this->privateMerchantKey = $privateKey;
     }
+
+    /**
+     * Override the location (URL or local file path) of the SpectroCoin public
+     * certificate used to verify callback signatures. Defaults to the remote
+     * URL; pinning a locally shipped copy avoids an unauthenticated network
+     * fetch on every callback and makes signature verification testable.
+     *
+     * @param string $location
+     */
+    public function setPublicSpectroCoinCertLocation($location) {
+        $this->publicSpectroCoinCertLocation = $location;
+    }
     
     /**
      * @param CreateOrderRequest $request
@@ -184,7 +196,19 @@ class SCMerchantClient {
 	{
 		$sig = base64_decode($signature);
 		$publicKey = file_get_contents($this->publicSpectroCoinCertLocation);
+		if ($publicKey === false) {
+			return -1;
+		}
 		$public_key_pem = openssl_pkey_get_public($publicKey);
+		if ($public_key_pem === false) {
+			return -1;
+		}
+		// NOTE (secondary weakness): SpectroCoin's legacy merchant API signs
+		// callbacks with RSA-SHA1, so the verifier must use SHA1 to match the
+		// signer. SHA1 is deprecated; the newer SpectroCoin plugins instead
+		// fetch the authoritative order status from the API with merchant
+		// credentials rather than trusting a caller-supplied, SHA1-signed
+		// payload. Migrating to that scheme is the recommended follow-up.
 		$r = openssl_verify($data, $sig, $public_key_pem, OPENSSL_ALGO_SHA1);
 
 		return $r;
