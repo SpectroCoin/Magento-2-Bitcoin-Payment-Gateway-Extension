@@ -210,11 +210,28 @@ class Payment extends AbstractMethod {
     }
 
     /**
-     * Returns order status mapped to spectrocoin status
+     * Returns order status mapped to spectrocoin status, or NULL when the order
+     * must be left exactly as it is.
+     *
      * @param string $spectrocoinStatus
-     * @return mixed|string
+     * @return mixed|string|null
      */
     protected function getOrderStatus($spectrocoinStatus) {
+        // Statuses that end the order without payment reuse the configured
+        // "failed" status, so they need no new admin settings.
+        if (OrderStatusEnum::isCancellation($spectrocoinStatus)) {
+            return $this->getStatusDataOrDefault(
+                'payment_settings/order_status_failed',
+                'closed'
+            );
+        }
+
+        // Statuses that only report on a payment in progress carry no
+        // transition of their own.
+        if (OrderStatusEnum::isInformational($spectrocoinStatus)) {
+            return null;
+        }
+
         switch($spectrocoinStatus) {
             case OrderStatusEnum::$New:
                 $statusOption = $this->getStatusDataOrDefault(
@@ -259,10 +276,10 @@ class Payment extends AbstractMethod {
                 break;
 
             default:
-                $statusOption = $this->getStatusDataOrDefault(
-                    'payment_settings/order_status_test',
-                    'pending_payment'
-                );
+                // A status outside the documented set must not be guessed at.
+                // Reusing the test-order status here moved live orders to an
+                // unrelated state.
+                $statusOption = null;
         }
 
         return $statusOption;
@@ -297,6 +314,12 @@ class Payment extends AbstractMethod {
     public function updateOrderStatus(OrderCallback $callback, Order $order) {
         try {
             $orderState = $this->getOrderStatus($callback->getStatus());
+
+            // NULL means the reported status carries no transition: the
+            // callback is acknowledged and the order is left untouched.
+            if ($orderState === null) {
+                return true;
+            }
 
             $order
                 ->setState($orderState, true)

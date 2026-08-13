@@ -58,18 +58,14 @@ class Callback extends Action implements CsrfAwareActionInterface {
     /**
      * Handle a SpectroCoin order-status callback.
      *
-     * Security: the callback status is attacker-controllable, so nothing here
-     * may trust it until the RSA signature has been verified against
-     * SpectroCoin's public certificate. Prior to this fix the signature was
-     * never checked, allowing an unauthenticated attacker to POST a forged
-     * "paid" (status=3) callback for their own order and have it marked
-     * complete without paying.
+     * The reported status is caller-supplied, so nothing here may act on it
+     * until the RSA signature has been verified against SpectroCoin's public
+     * certificate. That check is what authenticates the request.
      *
      * @return void
      */
     public function execute() {
-        // 1. Callbacks are server-to-server POSTs. Reject anything else so a
-        //    forged callback cannot be triggered via a simple GET link.
+        // 1. Callbacks are server-to-server POSTs; nothing else is accepted.
         if (!$this->httpRequest->isPost()) {
             $this->getResponse()->setBody('*error*');
             return;
@@ -83,8 +79,7 @@ class Callback extends Action implements CsrfAwareActionInterface {
             return;
         }
 
-        // 3. Cryptographically verify the signature BEFORE loading or mutating
-        //    any order. This is the fix for the unauthenticated payment bypass.
+        // 3. Verify the signature before loading or mutating any order.
         if (!$this->client->validateCreateOrderCallback($orderCallback)) {
             $this->getResponse()->setBody('*error*');
             return;
