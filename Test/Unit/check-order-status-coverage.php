@@ -17,7 +17,7 @@
  * Standalone by design: this extension ships no PHPUnit setup, and a Magento
  * bootstrap is not needed to check a status table.
  *
- * Run:  php Test/Unit/OrderStatusCoverageTest.php
+ * Run:  php Test/Unit/check-order-status-coverage.php
  */
 
 require_once __DIR__ . '/../../Library/SCMerchantClient/Data/OrderStatusEnum.php';
