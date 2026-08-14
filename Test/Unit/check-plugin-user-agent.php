@@ -71,7 +71,7 @@ echo "SpectroCoin Magento2 — plugin identification header\n\n";
 
 $t->run('the client declares its platform and version', function ($t) use ($source) {
     $t->assertSame('Magento2', constant_in($source, 'PLUGIN_PLATFORM'), 'PLUGIN_PLATFORM');
-    $t->assertSame('1.0.5', constant_in($source, 'PLUGIN_VERSION'), 'PLUGIN_VERSION');
+    $t->assertSame('1.0.6', constant_in($source, 'PLUGIN_VERSION'), 'PLUGIN_VERSION');
 });
 
 $t->run('the header is wired into the HTTP client', function ($t) use ($source) {
@@ -100,7 +100,7 @@ $t->run('the header carries no merchant or site identity', function ($t) use ($s
 
 $t->run('the advertised version matches the plugin version', function ($t) use ($root) {
     $declared = json_decode(file_get_contents($root . 'composer.json'), true)['version'];
-    $t->assertSame($declared, '1.0.5',
+    $t->assertSame($declared, '1.0.6',
         'composer.json and the advertised version must not drift');
 });
 

@@ -31,6 +31,7 @@ const WIRE_STATUSES = [
     'CANCELLED' => 13, 'INVALID_PAYMENT' => 14, 'PROCESSING_REFUND' => 17,
     'REFUNDED' => 18, 'REJECTED_REFUND' => 19,
     'PENDING_LATE_CRYPTO_PAYMENT' => 20, 'REJECTED' => 21,
+    'TEST' => 6, 'TEST_PAID' => 15, 'TEST_EXPIRED' => 16,
 ];
 
 const CANCELLATIONS = ['FAILED', 'CANCELLED', 'REJECTED', 'INVALID_PAYMENT'];
@@ -140,6 +141,16 @@ $t->run('no transition is applied when the mapping declines', function ($t) use 
         'updateOrderStatus() must return early when there is no transition to apply');
     $t->assertTrue(strpos($body, 'return true;') < strpos($body, '->setState('),
         'the early return must come before the order is written');
+});
+
+$t->run('test statuses reuse the configured test status, never a real transition', function ($t) use ($paymentSource) {
+    $tail = substr($paymentSource, strpos($paymentSource, 'protected function getOrderStatus'));
+    foreach (array('$Test', '$TestPaid', '$TestExpired') as $c) {
+        $t->assertTrue(strpos($tail, 'OrderStatusEnum::' . $c) !== false,
+            "getOrderStatus() must route {$c} to the configured test status");
+    }
+    $t->assertTrue(strpos($tail, 'order_status_test') !== false,
+        'the test statuses must resolve to payment_settings/order_status_test');
 });
 
 exit($t->summary());
