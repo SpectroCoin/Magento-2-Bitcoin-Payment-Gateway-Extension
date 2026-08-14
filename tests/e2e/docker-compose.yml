@@ -1,0 +1,53 @@
+# Tier 1 smoke test: a real Magento 2 (Mage-OS, the auth-free distribution),
+# into which the packaged module is installed as a merchant would install it.
+#
+# Heavier than the other platforms: Magento needs MySQL and a search engine, and
+# both the install and the DI compile take minutes. Intended for release-bound
+# runs, not every push.
+services:
+  db:
+    image: mysql:8.0
+    # --mysql-native-password is MySQL 8.4+ syntax and aborts 8.0 startup.
+    command: --log-bin-trust-function-creators=1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: magento
+    healthcheck:
+      # Asserts the DATABASE exists, not merely that the server answers.
+      test: ["CMD-SHELL", "mysql -uroot -proot -e 'USE magento' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+  magento:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    ports:
+      - "8085:80"
+    volumes:
+      - magento:/var/www/html
+
+volumes:
+  magento:

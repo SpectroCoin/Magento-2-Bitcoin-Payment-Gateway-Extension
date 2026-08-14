@@ -1,0 +1,5 @@
+# Development-only paths are excluded from the Composer dist archive, so they
+# never land in a merchant's vendor/ directory.
+/tests            export-ignore
+/.github          export-ignore
+/.gitattributes   export-ignore
