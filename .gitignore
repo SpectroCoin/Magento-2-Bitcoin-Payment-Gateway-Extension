@@ -1,2 +1,2 @@
 **/.DS_Store
-/vendor/
+/vendor//tests/e2e/tier2/.certs
