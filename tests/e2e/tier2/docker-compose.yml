@@ -1,0 +1,75 @@
+# Tier 2: a real Magento 2 (Mage-OS), and a stand-in SpectroCoin API that
+# answers as spectrocoin.com inside this network.
+#
+# The alias earns its place twice here: the extension's api_url default already
+# points at spectrocoin.com, and - because this is the legacy signed flow - it
+# fetches the certificate it verifies callback signatures against from a
+# hardcoded URL on that host.
+services:
+  db:
+    image: mysql:8.0
+    # --mysql-native-password is MySQL 8.4+ syntax and aborts 8.0 startup.
+    command: --log-bin-trust-function-creators=1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: magento
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -proot -e 'USE magento' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+  spectrocoin:
+    build:
+      context: ./stub
+    networks:
+      default:
+        aliases:
+          - spectrocoin.com
+    volumes:
+      - ./.certs:/certs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/__test/requests"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  magento:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+      spectrocoin:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - shop.test
+    volumes:
+      - magento:/var/www/html
+      - ./.certs:/certs:ro
+    ports:
+      - "8090:80"
+
+volumes:
+  magento:
