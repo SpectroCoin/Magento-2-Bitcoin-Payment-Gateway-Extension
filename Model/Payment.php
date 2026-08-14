@@ -269,6 +269,8 @@ class Payment extends AbstractMethod {
                 break;
 
             case OrderStatusEnum::$Test:
+            case OrderStatusEnum::$TestPaid:
+            case OrderStatusEnum::$TestExpired:
                 $statusOption = $this->getStatusDataOrDefault(
                     'payment_settings/order_status_test',
                     'payment_review'

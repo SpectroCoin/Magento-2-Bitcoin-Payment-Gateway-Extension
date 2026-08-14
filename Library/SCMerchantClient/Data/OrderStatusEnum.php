@@ -9,6 +9,8 @@ class OrderStatusEnum {
 	public static $Failed = 4;
 	public static $Expired = 5;
 	public static $Test = 6;
+	public static $TestPaid = 15;
+	public static $TestExpired = 16;
 	public static $LateCryptoPayment = 10;
 	public static $PartialPayment = 11;
 	public static $Underpaid = 12;
