@@ -1,0 +1,29 @@
+name: Smoke
+
+# Installs the module into a real Magento 2 (Mage-OS, the auth-free
+# distribution) and checks it runs - crucially that setup:di:compile succeeds,
+# which is where Magento resolves constructor dependencies.
+#
+# This is the heaviest of the smoke tests: create-project, setup:install and the
+# DI compile each take minutes, so it is not run on every push.
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run the smoke test
+        run: ./tests/e2e/smoke.sh
+
+      - name: Container logs on failure
+        if: failure()
+        run: cd tests/e2e && docker compose logs --tail=150 || true
