@@ -1,2 +1,6 @@
 **/.DS_Store
 /vendor//tests/e2e/tier2/.certs
+/tests/e2e/tier3/.certs
+/tests/e2e/tier3/artifacts
+/tests/e2e/tier3/node_modules
+/tests/e2e/tier3/package*.json
