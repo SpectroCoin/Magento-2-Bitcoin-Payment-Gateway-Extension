@@ -1,0 +1,84 @@
+name: Create tag and release
+
+on:
+  workflow_run:
+    workflows: ["Launch release.yml after closed PR"]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create_tag_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Decide whether this merge is a release
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          PR_TITLE=$(gh pr list --state merged --limit 1 --json title --jq '.[0].title')
+          echo "Last merged pull request: $PR_TITLE"
+
+          # A release is cut only for a pull request whose title is the version
+          # being released. Every other merge - tests, CI, documentation - must
+          # leave the workflow doing nothing, or its title would become a tag.
+          if ! printf '%s' "$PR_TITLE" | grep -qE '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Not a version number, so nothing is released."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION="${PR_TITLE#v}"
+          TAG_NAME="v$VERSION"   # this repository's tags carry the v prefix
+
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists, so nothing is released."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # The module is installed with Composer, which reads its version from
+          # composer.json rather than from the tag. Releasing while the two
+          # disagree publishes a package that misreports its own version.
+          COMPOSER_VERSION=$(php -r 'echo json_decode(file_get_contents("composer.json"))->version ?? "";')
+          if [ "$COMPOSER_VERSION" != "$VERSION" ]; then
+            echo "composer.json says $COMPOSER_VERSION but the release is $VERSION."
+            echo "Update composer.json to match before merging the release pull request."
+            exit 1
+          fi
+
+          echo "release=true" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create the tag and the release
+        if: steps.decide.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.decide.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          PR_BODY=$(gh pr list --state merged --limit 1 --json body --jq '.[0].body')
+
+          git tag "$TAG_NAME"
+          git push origin "$TAG_NAME"
+
+          gh release create "$TAG_NAME" --title "$TAG_NAME" --notes "$PR_BODY"
+          echo "Released $TAG_NAME"
