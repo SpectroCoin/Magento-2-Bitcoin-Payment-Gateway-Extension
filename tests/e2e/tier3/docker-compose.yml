@@ -1,0 +1,98 @@
+# Tier 3: a real shopper journey in a real browser.
+#
+# Tier 1 proves the module compiles and loads. Tier 2 drives the extension's
+# own getSpectrocoinResponse() and every signed callback status directly, so
+# it proves the gateway works - but never that a shopper can reach it.
+# Magento's checkout is a Knockout/UI-component app, and a payment method can
+# be correctly configured on the backend and still never render there. So
+# this one buys a product through the real storefront: add to cart, fill in
+# the address, pick the shipping method, pick SpectroCoin, place the order,
+# and follow the redirect to the payment page.
+#
+# The stub is the same legacy signed-flow stub tier2 uses: it answers
+# createOrder and serves the certificate the extension fetches for callback
+# verification, though this tier never delivers a callback itself.
+#
+# Explicit project name: compose otherwise derives it from the directory
+# basename ("tier3"), which collides with every other plugin repo's own
+# tests/e2e/tier3/ stack on a shared Docker host - `docker compose down -v`
+# in one repo would tear down another repo's containers.
+name: magento2-spectrocoin-tier3
+services:
+  db:
+    image: mysql:8.0
+    # --mysql-native-password is MySQL 8.4+ syntax and aborts 8.0 startup.
+    command: --log-bin-trust-function-creators=1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: magento
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -proot -e 'USE magento' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+  spectrocoin:
+    build:
+      context: ./stub
+    networks:
+      default:
+        aliases:
+          - spectrocoin.com
+    volumes:
+      - ./.certs:/certs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/__test/requests"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  magento:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+      spectrocoin:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - shop.test
+    volumes:
+      - magento:/var/www/html
+      - ./.certs:/certs:ro
+    ports:
+      - "8096:80"
+
+  # Carries its own browsers; nothing is downloaded at run time.
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.50.0-noble
+    depends_on:
+      - magento
+    volumes:
+      - ./:/work
+    working_dir: /work
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+volumes:
+  magento:

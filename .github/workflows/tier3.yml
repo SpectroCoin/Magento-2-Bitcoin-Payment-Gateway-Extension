@@ -1,0 +1,41 @@
+name: Checkout journey
+
+# Walks a real shopper through a real Magento checkout: add to cart -> address
+# -> shipping method -> pick SpectroCoin -> place order -> land on the
+# SpectroCoin payment page.
+#
+# This is the layer tiers 1 and 2 cannot reach. Tier 2 drives
+# getSpectrocoinResponse() and every signed callback status directly, so it
+# proves the gateway works but not that a shopper can ever reach it - and
+# Magento's checkout is a Knockout/UI-component app assembled from jsLayout
+# XML merges, so "is it offered" is a genuinely different question from "does
+# the gateway function".
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  tier3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run the checkout journey
+        run: ./tests/e2e/tier3/tier3.sh
+
+      - name: Screenshots of any failing step
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tier3-screenshots
+          path: tests/e2e/tier3/artifacts/
+          if-no-files-found: ignore
+
+      - name: Container logs on failure
+        if: failure()
+        run: cd tests/e2e/tier3 && docker compose logs --tail=150 || true
