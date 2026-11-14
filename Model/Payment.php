@@ -63,8 +63,8 @@ class Payment extends AbstractMethod {
         Logger $logger,
         UrlInterface $urlBuilder,
         StoreManagerInterface $storeManager,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = array()
     ) {
         parent::__construct(
